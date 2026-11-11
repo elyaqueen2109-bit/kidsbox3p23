@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moving Day - Interactive Lesson</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh; display: flex; justify-content: center;
+    align-items: flex-start; padding: 20px;
+  }
+  .container {
+    max-width: 1100px; width: 100%;
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+    border-radius: 48px; padding: 30px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .header { text-align: center; margin-bottom: 28px; }
+  .header h1 {
+    font-family: 'Fredoka One', cursive; font-size: 3.2rem;
+    background: linear-gradient(135deg,#f7971e,#ffd200);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }
+  .header .subtitle {
+    font-size: 1.2rem; color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.08); padding: 6px 28px;
+    border-radius: 40px; display: inline-block;
+    border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px);
+    font-weight: 700;
+  }
+  .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+  .tab-btn {
+    border: none; padding: 12px 18px; border-radius: 60px;
+    font-size: 0.9rem; font-weight: 800; font-family: 'Nunito', sans-serif;
+    cursor: pointer; background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.3s ease; backdrop-filter: blur(4px);
+  }
+  .tab-btn:hover { background: rgba(255,255,255,0.12); color: #fff; transform: translateY(-2px); }
+  .tab-btn.active {
+    background: linear-gradient(135deg,#f7971e,#ffd200); color: #1a1a2e;
+    border-color: transparent; box-shadow: 0 8px 30px rgba(247,151,30,0.35);
+    transform: translateY(-2px);
+  }
+  .tab-content { display: none; animation: fadeSlide 0.5s ease forwards; }
+  .tab-content.active { display: block; }
+  @keyframes fadeSlide { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+  .panel {
+    background: rgba(255,255,255,0.04); border-radius: 32px;
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(8px); padding: 25px; margin-bottom: 20px;
+    text-align: center; position: relative;
+  }
+  .section-title {
+    font-family: 'Fredoka One', cursive; font-size: 1.6rem;
+    color: #ffd200; margin-bottom: 15px;
+  }
+
+  /* ===== TAB 1: WARM-UP FLIP CARDS ===== */
+  .flip-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+    max-width: 800px; margin: 0 auto;
+  }
+  .flip-card { perspective: 1000px; cursor: pointer; aspect-ratio: 4/3; }
+  .flip-inner {
+    position: relative; width: 100%; height: 100%;
+    transition: transform 0.6s; transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    -webkit-backface-visibility: hidden; backface-visibility: hidden;
+    border-radius: 20px; border: 3px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .flip-front { background: #fff; }
+  .flip-front img { width: 100%; height: 100%; object-fit: contain; }
+  
+  .flip-back {
+    background: linear-gradient(135deg, #302b63, #24243e);
+    transform: rotateY(180deg); padding: 15px;
+    color: #ffd200; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    text-align: center; line-height: 1.4;
+  }
+
+  /* ===== TAB 2: LISTENING (1 of 3) ===== */
+  .audio-prompt { margin-bottom: 20px; }
+  .btn-listen {
+    background: linear-gradient(135deg,#a855f7,#8b5cf6); color: #fff;
+    padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; border: none;
+    cursor: pointer; box-shadow: 0 8px 20px rgba(168,85,247,0.4); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .btn-listen:hover { transform: scale(1.05); }
+  .listen-pics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 800px; margin: 0 auto; }
+  .listen-pic {
+    background: #fff; border-radius: 20px; border: 4px solid transparent;
+    cursor: pointer; transition: all 0.3s; overflow: hidden;
+    aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+  }
+  .listen-pic img { width: 100%; height: 100%; object-fit: contain; }
+  .listen-pic:hover { transform: scale(1.05); border-color: #ffd200; }
+  .listen-pic.correct { border-color: #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.6); transform: scale(1.05); }
+  .listen-pic.wrong { border-color: #f87171; animation: shake 0.4s; }
+
+  /* ===== TAB 3: MATCH GAME ===== */
+  .match-text-display {
+    font-size: 1.5rem; font-weight: 800; color: #fff;
+    background: rgba(255,210,0,0.1); padding: 25px; border-radius: 24px;
+    border-left: 8px solid #ffd200; margin-bottom: 30px;
+    min-height: 120px; display: flex; align-items: center; justify-content: center;
+    text-align: center; transition: opacity 0.3s;
+  }
+  .match-pics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+  .match-pic {
+    background: #fff; border-radius: 18px; border: 4px solid transparent;
+    cursor: pointer; transition: all 0.3s; overflow: hidden;
+    aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+  }
+  .match-pic img { width: 100%; height: 100%; object-fit: cover; }
+  .match-pic:hover { transform: scale(1.05); border-color: #60a5fa; }
+  .match-pic.correct { border-color: #4ade80; box-shadow: 0 0 20px rgba(74,222,128,0.6); transform: scale(1.05); }
+  .match-pic.wrong { border-color: #f87171; animation: shake 0.4s; }
+
+  /* ===== TAB 4: YES/NO GAME ===== */
+  .yn-card {
+    font-size: 1.8rem; font-weight: 800; color: #fff;
+    background: rgba(255,255,255,0.05); padding: 40px 20px; border-radius: 30px;
+    border: 2px solid rgba(255,255,255,0.1); margin-bottom: 30px;
+    min-height: 150px; display: flex; align-items: center; justify-content: center;
+    text-align: center; transition: all 0.4s;
+  }
+  .yn-big-btns { display: flex; justify-content: center; gap: 40px; }
+  .btn-big-yn {
+    width: 140px; height: 140px; border-radius: 50%; border: none;
+    font-size: 1.8rem; font-weight: 900; font-family: 'Fredoka One', cursive;
+    color: #fff; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+  }
+  .btn-big-yn:hover { transform: translateY(-5px) scale(1.05); }
+  .btn-big-yn:active { transform: scale(0.95); }
+  .btn-yes { background: linear-gradient(135deg,#4ade80,#22c55e); }
+  .btn-no { background: linear-gradient(135deg,#f87171,#ef4444); }
+
+  /* ===== TAB 5: READ & CHOOSE ===== */
+  .choose-card {
+    font-size: 1.8rem; font-weight: 800; color: #fff;
+    background: rgba(255,255,255,0.05); padding: 40px 20px; border-radius: 30px;
+    border: 2px solid rgba(255,255,255,0.1); margin-bottom: 30px;
+    min-height: 120px; display: flex; align-items: center; justify-content: center;
+    text-align: center; transition: all 0.4s; flex-wrap: wrap; gap: 10px;
+  }
+  .choose-card .blank { 
+    color: #ffd200; 
+    border-bottom: 4px dashed #ffd200; 
+    padding: 0 20px; 
+    min-width: 150px; 
+    display: inline-block;
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+  .choose-btns { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+  .btn-choose {
+    padding: 20px 50px; border-radius: 20px; border: none;
+    font-size: 1.5rem; font-weight: 800; font-family: 'Nunito', sans-serif;
+    color: #fff; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3); background: linear-gradient(135deg,#60a5fa,#3b82f6);
+  }
+  .btn-choose:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(96,165,250,0.5); }
+  .btn-choose:active { transform: scale(0.95); }
+  .btn-choose.correct { background: linear-gradient(135deg,#4ade80,#22c55e); box-shadow: 0 0 20px rgba(74,222,128,0.6); }
+  .btn-choose.wrong { background: linear-gradient(135deg,#f87171,#ef4444); animation: shake 0.4s; }
+
+  /* ===== TAB 6: WORD BANK ===== */
+  .word-bank {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    background: rgba(74,222,128,0.06); padding: 18px 20px;
+    border-radius: 24px; border: 1px solid rgba(74,222,128,0.2); margin: 15px 0;
+  }
+  .word-chip {
+    background: rgba(255,255,255,0.08); padding: 10px 20px; border-radius: 40px;
+    border: 2px solid rgba(74,222,128,0.5); color: #4ade80; font-weight: 800;
+    font-size: 1rem; cursor: grab; user-select: none; transition: all 0.2s;
+  }
+  .word-chip:hover { background: rgba(74,222,128,0.15); transform: translateY(-2px); }
+  .word-chip:active { cursor: grabbing; }
+  .word-chip.dragging { opacity: 0.5; }
+  .word-chip.used { opacity: 0.25; pointer-events: none; }
+
+  .sentence-box {
+    background: rgba(255,210,0,0.06); padding: 22px 26px; border-radius: 24px;
+    border-left: 6px solid #ffd200; color: #fff; font-size: 1.2rem;
+    line-height: 2.8; font-weight: 600; text-align: left;
+  }
+  .slot {
+    display: inline-block; min-width: 140px; min-height: 38px; padding: 4px 12px;
+    margin: 0 4px; border-radius: 12px; border: 2px dashed #ffd200;
+    background: rgba(15,12,41,0.5); color: #ffd200; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1.1rem; text-align: center; vertical-align: middle;
+    transition: all 0.25s; cursor: pointer;
+  }
+  .slot.over { background: rgba(255,210,0,0.2); border-style: solid; }
+  .slot.filled { background: linear-gradient(135deg,#f7971e,#ffd200); color: #1a1a2e; border: 2px solid transparent; cursor: grab; }
+  .slot.correct { background: linear-gradient(135deg,#4ade80,#22c55e); color: #1a1a2e; border: 2px solid transparent; }
+  .slot.wrong { background: linear-gradient(135deg,#f87171,#ef4444); color: #fff; border: 2px solid transparent; }
+
+  /* ===== TAB 7: PAGE 21 ===== */
+  .splat-grid {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 20px;
+  }
+  .splat {
+    width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1.2rem; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    background-size: cover; background-position: center;
+    clip-path: polygon(50% 0%, 80% 10%, 100% 30%, 90% 60%, 100% 90%, 70% 100%, 40% 90%, 10% 100%, 0% 70%, 10% 30%, 0% 10%);
+  }
+  .splat.c1 { background-color: #ff7e5f; }
+  .splat.c2 { background-color: #4facfe; }
+  .splat.c3 { background-color: #43e97b; }
+  .splat.c4 { background-color: #fa709a; }
+  .splat.c5 { background-color: #b224ef; }
+  .splat.c6 { background-color: #f6d365; }
+  .splat.c7 { background-color: #00f2fe; }
+  .splat.c8 { background-color: #ff0844; }
+  .splat.c9 { background-color: #00b09b; }
+
+  .houses-img { max-width: 100%; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+  /* ===== AUDIO PLAYER ===== */
+  .audio-player {
+    background: rgba(255,255,255,0.04); border-radius: 28px;
+    padding: 20px; border: 1px solid rgba(255,255,255,0.06);
+    margin: 15px auto; max-width: 600px;
+  }
+  .audio-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .audio-btn {
+    border: none; width: 50px; height: 50px; border-radius: 50%;
+    font-size: 1.15rem; font-weight: 800; cursor: pointer;
+    background: rgba(255,255,255,0.08); color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .audio-btn:hover { background: rgba(255,255,255,0.18); transform: translateY(-3px); }
+  .audio-btn.main { width: 64px; height: 64px; font-size: 1.4rem; background: linear-gradient(135deg,#f7971e,#ffd200); color: #1a1a2e; box-shadow: 0 8px 30px rgba(247,151,30,0.4); }
+  .progress-wrap { display: flex; align-items: center; gap: 12px; margin-top: 14px; color: #fff; font-weight: 700; font-size: 0.9rem; }
+  .progress-bar { flex: 1; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(135deg,#f7971e,#ffd200); transition: width 0.15s linear; }
+  .audio-status { text-align: center; margin-top: 10px; font-size: 0.9rem; color: rgba(255,255,255,0.5); font-weight: 700; }
+
+  .btn-group { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 20px 0 5px; }
+  .btn {
+    border: none; padding: 12px 28px; border-radius: 60px; font-size: 1rem;
+    font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.175,0.885,0.32,1.275);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .btn-gold { background: linear-gradient(135deg,#f7971e,#ffd200); color: #1a1a2e; box-shadow: 0 8px 30px rgba(247,151,30,0.3); }
+  .btn-glass { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px); }
+  .btn-blue { background: linear-gradient(135deg,#60a5fa,#3b82f6); color: #fff; box-shadow: 0 8px 30px rgba(96,165,250,0.25); }
+  
+  .feedback-box {
+    text-align: center; font-size: 1.2rem; font-weight: 800; color: #fff;
+    min-height: 2.5rem; padding: 15px; border-radius: 40px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); margin: 15px 0;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+
+  @media (max-width: 700px) {
+    .flip-grid { grid-template-columns: 1fr; }
+    .match-pics, .listen-pics { grid-template-columns: repeat(2, 1fr); }
+    .btn-big-yn { width: 100px; height: 100px; font-size: 1.3rem; }
+    .yn-big-btns, .choose-btns { gap: 15px; }
+    .btn-choose { padding: 15px 25px; font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>🚚 Moving Day</h1>
+    <span class="subtitle">🌟 Interactive Lesson 🌟</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-warmup">1️⃣ Warm-up</button>
+    <button class="tab-btn" data-tab="tab-listen">2️⃣ Listen</button>
+    <button class="tab-btn" data-tab="tab-match">3️⃣ Match</button>
+    <button class="tab-btn" data-tab="tab-yn">4️⃣ Yes / No</button>
+    <button class="tab-btn" data-tab="tab-choose">5️⃣ Choose</button>
+    <button class="tab-btn" data-tab="tab-complete">6️⃣ Complete</button>
+    <button class="tab-btn" data-tab="tab-p21">7️⃣ Numbers & Houses</button>
+  </div>
+
+  <!-- ============ TAB 1: WARM-UP ============ -->
+  <div class="tab-content active" id="tab-warmup">
+    <div class="panel">
+      <div class="section-title">👀 Look and say</div>
+      <p style="color:rgba(255,255,255,0.7); margin-bottom:20px; font-weight:600;">Click the picture to see the action and hear it.</p>
+      
+      <div class="flip-grid">
+        <div class="flip-card" onclick="flipCard(this, 'He is carrying a big box.')">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="1.png" alt="Carry box"></div>
+            <div class="flip-back">He is carrying a big box.</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="flipCard(this, 'He needs a drink.')">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="2.png" alt="Drink"></div>
+            <div class="flip-back">He needs a drink.</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="flipCard(this, 'She is smiling.')">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="3.png" alt="Smiling"></div>
+            <div class="flip-back">She is smiling.</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="flipCard(this, 'She is taking a book.')">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="4.png" alt="Taking book"></div>
+            <div class="flip-back">She is taking a book.</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="flipCard(this, 'He is climbing the stairs.')">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="5.png" alt="Climbing"></div>
+            <div class="flip-back">He is climbing the stairs.</div>
+          </div>
+        </div>
+        <div class="flip-card" onclick="flipCard(this, 'He is sitting on the chair.')">
+          <div class="flip-inner">
+            <div class="flip-front"><img src="6.png" alt="Sitting"></div>
+            <div class="flip-back">He is sitting on the chair.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: LISTENING ============ -->
+  <div class="tab-content" id="tab-listen">
+    <div class="panel">
+      <div class="section-title">🎧 Listen and choose</div>
+      <div class="audio-prompt">
+        <button class="btn-listen" onclick="playListenAudio()">🔊 Listen again</button>
+      </div>
+      <div class="listen-pics" id="listenPics"></div>
+      <div class="feedback-box" id="fbListen">Listen and click the correct picture.</div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 3: MATCH ============ -->
+  <div class="tab-content" id="tab-match">
+    <div class="panel">
+      <div class="section-title">🧩 Match the text to the picture</div>
+      <div class="match-text-display" id="matchTextDisplay"></div>
+      <div class="match-pics" id="matchPics">
+        <div class="match-pic" data-id="f" onclick="checkMatch('f')"><img src="f.png" alt="f"></div>
+        <div class="match-pic" data-id="b" onclick="checkMatch('b')"><img src="b.png" alt="b"></div>
+        <div class="match-pic" data-id="c" onclick="checkMatch('c')"><img src="c.png" alt="c"></div>
+        <div class="match-pic" data-id="d" onclick="checkMatch('d')"><img src="d.png" alt="d"></div>
+        <div class="match-pic" data-id="a" onclick="checkMatch('a')"><img src="a.png" alt="a"></div>
+        <div class="match-pic" data-id="e" onclick="checkMatch('e')"><img src="e.png" alt="e"></div>
+      </div>
+      <div class="btn-group"><button class="btn btn-glass" onclick="resetMatch()">🔄 Restart</button></div>
+      <div class="feedback-box" id="fbMatch">Read the text and click the correct picture.</div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 4: YES/NO ============ -->
+  <div class="tab-content" id="tab-yn">
+    <div class="panel">
+      <div class="section-title">✅ Read and answer</div>
+      <div class="yn-card" id="ynCard"></div>
+      <div class="yn-big-btns">
+        <button class="btn-big-yn btn-yes" onclick="answerYN('yes')">YES</button>
+        <button class="btn-big-yn btn-no" onclick="answerYN('no')">NO</button>
+      </div>
+      <div class="feedback-box" id="fbYN" style="margin-top: 30px;">Answer the questions!</div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 5: READ & CHOOSE ============ -->
+  <div class="tab-content" id="tab-choose">
+    <div class="panel">
+      <div class="section-title">✏️ Read and choose</div>
+      <div class="choose-card" id="chooseCard"></div>
+      <div class="choose-btns" id="chooseBtns"></div>
+      <div class="feedback-box" id="fbChoose" style="margin-top: 30px;">Choose the correct word.</div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 6: COMPLETE ============ -->
+  <div class="tab-content" id="tab-complete">
+    <div class="panel">
+      <div class="section-title">✍️ Complete the sentences</div>
+      <p style="color:rgba(255,255,255,0.7); margin-bottom:15px; font-weight:600;">Drag the words into the correct gaps.</p>
+      <div class="word-bank" id="wordBank">
+        <div class="word-chip" draggable="true" data-word="carry">carry</div>
+        <div class="word-chip" draggable="true" data-word="need">need</div>
+        <div class="word-chip" draggable="true" data-word="take">take</div>
+        <div class="word-chip" draggable="true" data-word="move">move</div>
+        <div class="word-chip" draggable="true" data-word="smiling">smiling</div>
+        <div class="word-chip" draggable="true" data-word="climb">climb</div>
+        <div class="word-chip" draggable="true" data-word="sit">sit</div>
+      </div>
+      <div class="sentence-box" id="sentenceBox">
+        <div class="sentence">1. The two men have to <span class="slot" data-answer="carry"></span> the sofa upstairs.</div>
+        <div class="sentence">2. Meera is happy, so she is <span class="slot" data-answer="smiling"></span>.</div>
+        <div class="sentence">3. "We <span class="slot" data-answer="need"></span> a break!" says the tired men.</div>
+        <div class="sentence">4. Please <span class="slot" data-answer="take"></span> this lamp to your new room.</div>
+        <div class="sentence">5. Today, Meera's family will <span class="slot" data-answer="move"></span> to a new flat.</div>
+        <div class="sentence">6. It can be difficult to <span class="slot" data-answer="climb"></span> a tall tree.</div>
+        <div class="sentence">7. After running, I like to <span class="slot" data-answer="sit"></span> down and rest.</div>
+      </div>
+      <div class="btn-group" style="margin-top:20px;">
+        <button class="btn btn-blue" id="checkWB">✅ Check</button>
+        <button class="btn btn-gold" id="showWB">👀 Show Answers</button>
+        <button class="btn btn-glass" id="resetWB">🔄 Reset</button>
+      </div>
+      <div class="feedback-box" id="fbWB">🧩 Drag the words into the gaps!</div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 7: PAGE 21 ============ -->
+  <div class="tab-content" id="tab-p21">
+    <div class="panel">
+      <div class="section-title">9️⃣ Listen and say (Numbers)</div>
+      <div class="splat-grid">
+        <div class="splat c1">12</div><div class="splat c2">13</div><div class="splat c3">14</div>
+        <div class="splat c4">15</div><div class="splat c5">16</div><div class="splat c6">17</div>
+        <div class="splat c7">18</div><div class="splat c8">19</div><div class="splat c9">100</div>
+        <div class="splat c1">20</div><div class="splat c2">30</div><div class="splat c3">40</div>
+        <div class="splat c4">50</div><div class="splat c5">60</div><div class="splat c6">70</div>
+        <div class="splat c7">80</div><div class="splat c8">90</div>
+      </div>
+      <div class="audio-player" data-audio="28.mp3">
+        <div class="audio-row">
+          <button class="audio-btn rew" title="−3 seconds">⏪</button>
+          <button class="audio-btn main play" title="Play / Pause">▶️</button>
+          <button class="audio-btn fwd" title="+3 seconds">⏩</button>
+          <button class="audio-btn stop" title="Restart">🔄</button>
+        </div>
+        <div class="progress-wrap">
+          <span class="cur">0:00</span>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <span class="dur">0:00</span>
+        </div>
+        <div class="audio-status">Click ▶️ to play</div>
+      </div>
+
+      <div class="section-title" style="margin-top: 40px;">🔟 Listen. What colour are the doors?</div>
+      <img src="houses.png" alt="Houses" class="houses-img" onerror="this.style.display='none'; this.parentNode.insertAdjacentHTML('beforeend', '<p style=\'color:#ffd200\'>⚠ Put <b>houses.png</b> in the folder.</p>')">
+      
+      <div class="audio-player" data-audio="29.mp3">
+        <div class="audio-row">
+          <button class="audio-btn rew" title="−3 seconds">⏪</button>
+          <button class="audio-btn main play" title="Play / Pause">▶️</button>
+          <button class="audio-btn fwd" title="+3 seconds">⏩</button>
+          <button class="audio-btn stop" title="Restart">🔄</button>
+        </div>
+        <div class="progress-wrap">
+          <span class="cur">0:00</span>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <span class="dur">0:00</span>
+        </div>
+        <div class="audio-status">Click ▶️ to play</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ===== SOUND & SPEECH FX ===== */
+class SoundFX {
+  constructor(){ this.ctx=null; try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+  play(type){
+    if(!this.ctx) return;
+    try{
+      if(type==='correct'){
+        [523,659,784].forEach((f,i)=>{
+          const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+          o.connect(g); g.connect(this.ctx.destination);
+          g.gain.value=0.15; g.gain.exponentialRampToValueAtTime(0.01,this.ctx.currentTime+0.2+i*0.1);
+          o.type='sine'; o.frequency.value=f;
+          o.start(this.ctx.currentTime+i*0.1); o.stop(this.ctx.currentTime+0.2+i*0.1);
+        });
+      } else if(type==='wrong'){
+        const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+        o.connect(g); g.connect(this.ctx.destination);
+        g.gain.value=0.2; g.gain.exponentialRampToValueAtTime(0.01,this.ctx.currentTime+0.3);
+        o.type='sawtooth'; o.frequency.setValueAtTime(400,this.ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(200,this.ctx.currentTime+0.25);
+        o.start(this.ctx.currentTime); o.stop(this.ctx.currentTime+0.3);
+      } else if(type==='reveal'){
+        [523,587,659,784].forEach((f,i)=>{
+          const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+          o.connect(g); g.connect(this.ctx.destination);
+          g.gain.value=0.1; g.gain.exponentialRampToValueAtTime(0.01,this.ctx.currentTime+0.15+i*0.08);
+          o.type='sine'; o.frequency.value=f;
+          o.start(this.ctx.currentTime+i*0.08); o.stop(this.ctx.currentTime+0.15+i*0.08);
+        });
+      }
+    }catch(e){}
+  }
+}
+const sound = new SoundFX();
+
+function speak(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+document.addEventListener('click',()=>{ if(sound.ctx && sound.ctx.state==='suspended') sound.ctx.resume(); },{once:true});
+
+/* ===== TABS ===== */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    const t=this.dataset.tab;
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active',c.id===t));
+  });
+});
+
+/* ===== TAB 1: WARM-UP ===== */
+function flipCard(card, text) {
+  card.classList.toggle('flipped');
+  if (card.classList.contains('flipped')) {
+    setTimeout(() => speak(text), 300);
+  } else {
+    window.speechSynthesis.cancel();
+  }
+}
+
+/* ===== TAB 2: LISTENING ===== */
+const listenData = [
+  { text: "He is carrying a big box.", matchId: "1" },
+  { text: "He needs a drink.", matchId: "2" },
+  { text: "She is smiling.", matchId: "3" },
+  { text: "She is taking a book.", matchId: "4" },
+  { text: "He is climbing the stairs.", matchId: "5" },
+  { text: "He is sitting on the chair.", matchId: "6" }
+];
+let currentListenIndex = 0, listenInProgress = false;
+
+function loadListen() {
+  const picsContainer = document.getElementById('listenPics');
+  const fb = document.getElementById('fbListen');
+  if (currentListenIndex >= listenData.length) {
+    picsContainer.innerHTML = "<h2 style='color:#4ade80; grid-column: 1/-1;'>🎉 Fantastic! All done!</h2>";
+    fb.innerHTML = ""; return;
+  }
+  picsContainer.innerHTML = "";
+  const currentItem = listenData[currentListenIndex];
+  
+  let allIds = ["1", "2", "3", "4", "5", "6"];
+  let wrongIds = allIds.filter(id => id !== currentItem.matchId);
+  wrongIds.sort(() => 0.5 - Math.random());
+  let selectedIds = [currentItem.matchId, wrongIds[0], wrongIds[1]];
+  selectedIds.sort(() => 0.5 - Math.random());
+
+  selectedIds.forEach(id => {
+    const pic = document.createElement('div');
+    pic.className = 'listen-pic';
+    pic.innerHTML = `<img src="${id}.png" alt="${id}">`;
+    pic.onclick = () => checkListen(id, currentItem.matchId, pic);
+    picsContainer.appendChild(pic);
+  });
+
+  setTimeout(() => {
+    speak(currentItem.text);
+  }, 500);
+  listenInProgress = true;
+}
+function playListenAudio() {
+  if (currentListenIndex < listenData.length) {
+    speak(listenData[currentListenIndex].text);
+  }
+}
+function checkListen(clickedId, correctId, element) {
+  if (!listenInProgress) return;
+  if (clickedId === correctId) {
+    element.classList.add('correct'); sound.play('correct');
+    document.getElementById('fbListen').innerHTML = "✅ Correct!";
+    listenInProgress = false; currentListenIndex++;
+    setTimeout(loadListen, 1500);
+  } else {
+    element.classList.add('wrong'); sound.play('wrong');
+    document.getElementById('fbListen').innerHTML = "❌ Try again!";
+    setTimeout(() => element.classList.remove('wrong'), 500);
+  }
+}
+loadListen();
+
+/* ===== TAB 3: MATCHING ===== */
+const matchData = [
+  { text: "Today Meera and her family are moving. Two men are carrying the sofa to the lorry.", answer: "f" },
+  { text: "Her new address is fourteen Park Road. It's a flat.", answer: "c" },
+  { text: "There's a lift, but it's very small. The men can't take the sofa in the lift.", answer: "b" },
+  { text: "Meera's helping. She's taking a lamp upstairs. She's smiling because she can go in the lift.", answer: "a" },
+  { text: "The men are climbing the stairs with the sofa. It's difficult to carry.", answer: "e" },
+  { text: "Now the men are sitting on the sofa. They're having a break. They need a drink.", answer: "d" }
+];
+let currentMatchIndex = 0, matchInProgress = false;
+
+function loadMatch() {
+  const textDisplay = document.getElementById('matchTextDisplay');
+  const fb = document.getElementById('fbMatch');
+  if (currentMatchIndex >= matchData.length) {
+    textDisplay.innerHTML = "🎉 Excellent! You matched all the sentences!";
+    fb.innerHTML = ""; sound.play('correct'); return;
+  }
+  textDisplay.style.opacity = 0;
+  setTimeout(() => {
+    textDisplay.innerHTML = matchData[currentMatchIndex].text;
+    textDisplay.style.opacity = 1;
+  }, 300);
+  document.querySelectorAll('.match-pic').forEach(p => p.classList.remove('correct', 'wrong'));
+  matchInProgress = true;
+}
+function checkMatch(id) {
+  if (!matchInProgress) return;
+  const clickedPic = document.querySelector(`.match-pic[data-id="${id}"]`);
+  const fb = document.getElementById('fbMatch');
+  if (id === matchData[currentMatchIndex].answer) {
+    clickedPic.classList.add('correct'); sound.play('correct');
+    matchInProgress = false; fb.innerHTML = "✅ Correct!";
+    currentMatchIndex++; setTimeout(loadMatch, 1200);
+  } else {
+    clickedPic.classList.add('wrong'); sound.play('wrong');
+    fb.innerHTML = "❌ Try again!";
+    setTimeout(() => clickedPic.classList.remove('wrong'), 500);
+  }
+}
+function resetMatch() {
+  currentMatchIndex = 0; matchInProgress = true;
+  document.getElementById('fbMatch').innerHTML = "Read the text and click the correct picture.";
+  loadMatch();
+}
+loadMatch();
+
+/* ===== TAB 4: YES/NO ===== */
+const ynData = [
+  { text: "Meera's moving to a house.", answer: "no" },
+  { text: "Meera's smiling because she can go in the lift.", answer: "yes" },
+  { text: "The men need to carry the sofa downstairs.", answer: "no" },
+  { text: "Meera's taking a lamp upstairs.", answer: "yes" },
+  { text: "The sofa can go in the lift.", answer: "no" }
+];
+let currentYNIndex = 0, ynInProgress = false;
+function loadYN() {
+  const card = document.getElementById('ynCard');
+  const fb = document.getElementById('fbYN');
+  if (currentYNIndex >= ynData.length) {
+    card.innerHTML = "🎉 You answered all the questions!";
+    fb.innerHTML = "Great job!"; sound.play('correct'); ynInProgress = false; return;
+  }
+  card.style.opacity = 0;
+  setTimeout(() => {
+    card.innerHTML = ynData[currentYNIndex].text;
+    card.style.opacity = 1; fb.innerHTML = "";
+  }, 300);
+  ynInProgress = true;
+}
+function answerYN(userAnswer) {
+  if (!ynInProgress) return;
+  const card = document.getElementById('ynCard');
+  const fb = document.getElementById('fbYN');
+  if (userAnswer === ynData[currentYNIndex].answer) {
+    card.style.backgroundColor = 'rgba(74,222,128,0.2)'; card.style.borderColor = '#4ade80';
+    fb.innerHTML = "✅ Correct!"; sound.play('correct');
+    ynInProgress = false; currentYNIndex++;
+    setTimeout(() => {
+      card.style.backgroundColor = 'rgba(255,255,255,0.05)'; card.style.borderColor = 'rgba(255,255,255,0.1)'; loadYN();
+    }, 1200);
+  } else {
+    card.style.backgroundColor = 'rgba(248,113,113,0.2)'; card.style.borderColor = '#f87171';
+    fb.innerHTML = "❌ Try again!"; sound.play('wrong');
+    setTimeout(() => {
+      card.style.backgroundColor = 'rgba(255,255,255,0.05)'; card.style.borderColor = 'rgba(255,255,255,0.1)';
+    }, 500);
+  }
+}
+loadYN();
+
+/* ===== TAB 5: READ & CHOOSE ===== */
+const chooseData = [
+  { text: "Meera's [BLANK] a lamp upstairs.", correct: "taking", wrong: "climbing" },
+  { text: "The men are [BLANK] the sofa upstairs.", correct: "carrying", wrong: "going" },
+  { text: "My mum's [BLANK] on the sofa.", correct: "sitting", wrong: "carrying" },
+  { text: "Meera's [BLANK] because she's happy.", correct: "smiling", wrong: "taking" },
+  { text: "The boy's [BLANK] the tree.", correct: "climbing", wrong: "going" },
+  { text: "The children are [BLANK] water.", correct: "drinking", wrong: "smiling" },
+  { text: "Charlie's [BLANK] up in the lift.", correct: "going", wrong: "taking" },
+  { text: "The men are [BLANK] a break.", correct: "having", wrong: "sitting" }
+];
+let currentChooseIndex = 0, chooseInProgress = false;
+
+function loadChoose() {
+  const card = document.getElementById('chooseCard');
+  const btnsContainer = document.getElementById('chooseBtns');
+  const fb = document.getElementById('fbChoose');
+  if (currentChooseIndex >= chooseData.length) {
+    card.innerHTML = "🎉 Excellent! You chose all words!";
+    btnsContainer.innerHTML = ""; fb.innerHTML = "Great job!"; sound.play('correct'); return;
+  }
+  card.style.opacity = 0; btnsContainer.style.opacity = 0;
+  setTimeout(() => {
+    const data = chooseData[currentChooseIndex];
+    card.innerHTML = data.text.replace("[BLANK]", "<span class='blank'>?</span>");
+    btnsContainer.innerHTML = "";
+    
+    let options = Math.random() > 0.5 ? [data.correct, data.wrong] : [data.wrong, data.correct];
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-choose';
+      btn.innerText = opt;
+      btn.onclick = () => checkChoose(opt, btn, data.correct);
+      btnsContainer.appendChild(btn);
+    });
+    card.style.opacity = 1; btnsContainer.style.opacity = 1; fb.innerHTML = "";
+  }, 300);
+  chooseInProgress = true;
+}
+function checkChoose(selected, btnElement, correctAnswer) {
+  if (!chooseInProgress) return;
+  const fb = document.getElementById('fbChoose');
+  if (selected === correctAnswer) {
+    btnElement.classList.add('correct'); sound.play('correct');
+    fb.innerHTML = "✅ Correct!"; chooseInProgress = false;
+    currentChooseIndex++; setTimeout(loadChoose, 1200);
+  } else {
+    btnElement.classList.add('wrong'); sound.play('wrong');
+    fb.innerHTML = "❌ Try again!";
+    setTimeout(() => btnElement.classList.remove('wrong'), 500);
+  }
+}
+loadChoose();
+
+/* ===== TAB 6: WORD BANK ===== */
+const bank = document.getElementById('wordBank');
+const sentenceBox = document.getElementById('sentenceBox');
+let draggingChip = null, draggingFromSlot = null;
+
+bank.querySelectorAll('.word-chip').forEach(chip => {
+  chip.addEventListener('dragstart', (e) => {
+    draggingChip = chip; chip.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', chip.dataset.word);
+  });
+  chip.addEventListener('dragend', () => { chip.classList.remove('dragging'); draggingChip = null; });
+  chip.addEventListener('click', () => {
+    if (chip.classList.contains('used')) return;
+    const emptySlot = [...sentenceBox.querySelectorAll('.slot')].find(s => !s.classList.contains('filled'));
+    if (emptySlot) {
+      emptySlot.textContent = chip.dataset.word; emptySlot.dataset.userWord = chip.dataset.word;
+      emptySlot.classList.add('filled'); emptySlot.classList.remove('correct', 'wrong');
+      chip.classList.add('used'); chip.draggable = false;
+    }
+  });
+});
+
+sentenceBox.querySelectorAll('.slot').forEach(slot => {
+  slot.addEventListener('dragstart', (e) => {
+    if (!slot.classList.contains('filled')) return;
+    draggingFromSlot = slot; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', slot.dataset.userWord);
+  });
+  slot.addEventListener('click', () => {
+    if (!slot.classList.contains('filled')) return;
+    const word = slot.dataset.userWord;
+    slot.textContent = ''; slot.classList.remove('filled', 'correct', 'wrong'); delete slot.dataset.userWord;
+    const chip = [...bank.querySelectorAll('.word-chip')].find(c => c.dataset.word === word);
+    if (chip) { chip.classList.remove('used'); chip.draggable = true; }
+  });
+  slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('over'); });
+  slot.addEventListener('dragleave', () => { slot.classList.remove('over'); });
+  slot.addEventListener('drop', e => {
+    e.preventDefault(); slot.classList.remove('over');
+    if (!draggingChip && !draggingFromSlot) return;
+    if (draggingChip && !draggingChip.classList.contains('used')) {
+      if (slot.classList.contains('filled') && slot.dataset.userWord) {
+        const oldWord = slot.dataset.userWord;
+        const oldChip = [...bank.querySelectorAll('.word-chip')].find(c => c.dataset.word === oldWord);
+        if (oldChip) { oldChip.classList.remove('used'); oldChip.draggable = true; }
+      }
+      slot.textContent = draggingChip.dataset.word; slot.dataset.userWord = draggingChip.dataset.word;
+      slot.classList.add('filled'); slot.classList.remove('correct', 'wrong');
+      draggingChip.classList.add('used'); draggingChip.draggable = false;
+    } else if (draggingFromSlot && draggingFromSlot !== slot) {
+      const w1 = draggingFromSlot.dataset.userWord; const w2 = slot.dataset.userWord || null;
+      slot.textContent = w1; slot.dataset.userWord = w1; slot.classList.add('filled'); slot.classList.remove('correct', 'wrong');
+      if (w2) {
+        draggingFromSlot.textContent = w2; draggingFromSlot.dataset.userWord = w2; draggingFromSlot.classList.add('filled');
+      } else {
+        draggingFromSlot.textContent = ''; draggingFromSlot.classList.remove('filled'); delete draggingFromSlot.dataset.userWord;
+      }
+    }
+    draggingChip = null; draggingFromSlot = null;
+  });
+});
+
+document.getElementById('checkWB').addEventListener('click', () => {
+  let all = true;
+  sentenceBox.querySelectorAll('.slot').forEach(slot => {
+    slot.classList.remove('correct', 'wrong');
+    const user = (slot.dataset.userWord || '').toLowerCase();
+    const ans = (slot.dataset.answer || '').toLowerCase();
+    if (user === ans) slot.classList.add('correct');
+    else { if (user) slot.classList.add('wrong'); all = false; }
+  });
+  const fb = document.getElementById('fbWB');
+  if (all) { fb.innerHTML = '✅ <span style="color:#4ade80">All correct!</span>'; sound.play('correct'); }
+  else { fb.innerHTML = '❌ <span style="color:#f87171">Check your answers!</span>'; sound.play('wrong'); }
+});
+document.getElementById('showWB').addEventListener('click', () => {
+  sentenceBox.querySelectorAll('.slot').forEach(slot => {
+    slot.textContent = slot.dataset.answer; slot.dataset.userWord = slot.dataset.answer;
+    slot.classList.add('filled', 'correct'); slot.classList.remove('wrong');
+  });
+  bank.querySelectorAll('.word-chip').forEach(c => { c.classList.add('used'); c.draggable = false; });
+  document.getElementById('fbWB').innerHTML = '👀 <span style="color:#ffd200">Answers shown!</span>'; sound.play('reveal');
+});
+document.getElementById('resetWB').addEventListener('click', () => {
+  sentenceBox.querySelectorAll('.slot').forEach(slot => {
+    slot.textContent = ''; slot.classList.remove('filled', 'correct', 'wrong'); delete slot.dataset.userWord;
+  });
+  bank.querySelectorAll('.word-chip').forEach(c => { c.classList.remove('used'); c.draggable = true; });
+  document.getElementById('fbWB').innerHTML = '🧩 Drag the words into the gaps!';
+});
+
+/* ===== TAB 7: AUDIO PLAYERS (PAGE 21) ===== */
+document.querySelectorAll('.audio-player').forEach(player=>{
+  const file   = player.dataset.audio;
+  const btnPlay= player.querySelector('.play');
+  const btnRew = player.querySelector('.rew');
+  const btnFwd = player.querySelector('.fwd');
+  const btnStop= player.querySelector('.stop');
+  const st     = player.querySelector('.audio-status');
+  const cur    = player.querySelector('.cur');
+  const dur    = player.querySelector('.dur');
+  const fill   = player.querySelector('.progress-fill');
+  const prog   = player.querySelector('.progress-bar');
+  let audio=null, playing=false;
+  
+  function fmt(s){ if(!isFinite(s)) return '0:00'; const m=Math.floor(s/60), r=Math.floor(s%60); return m+':'+(r<10?'0':'')+r; }
+  function ensure(){
+    if(!audio){
+      audio=new Audio(file);
+      audio.addEventListener('loadedmetadata',()=>{ dur.textContent=fmt(audio.duration); });
+      audio.addEventListener('timeupdate',()=>{
+        cur.textContent=fmt(audio.currentTime);
+        if(audio.duration) fill.style.width=(audio.currentTime/audio.duration*100)+'%';
+      });
+      audio.addEventListener('ended',()=>{
+        playing=false; btnPlay.textContent='▶️'; st.textContent='✅ Finished!'; fill.style.width='100%';
+      });
+    }
+    return audio;
+  }
+  btnPlay.addEventListener('click',()=>{
+    const a=ensure();
+    if(playing){ a.pause(); playing=false; btnPlay.textContent='▶️'; st.textContent='⏸️ Paused'; return; }
+    a.play().then(()=>{ playing=true; btnPlay.textContent='⏸️'; st.textContent='🎧 Playing...'; })
+      .catch(()=>{ st.textContent='❌ File not found: '+file; });
+  });
+  btnRew.addEventListener('click',()=>{ const a=ensure(); a.currentTime=Math.max(0,a.currentTime-3); });
+  btnFwd.addEventListener('click',()=>{ const a=ensure(); a.currentTime=Math.min(a.duration||0,a.currentTime+3); });
+  btnStop.addEventListener('click',()=>{
+    const a=ensure(); a.pause(); a.currentTime=0; playing=false;
+    btnPlay.textContent='▶️'; st.textContent='🔄 Ready'; fill.style.width='0%'; cur.textContent='0:00';
+  });
+  prog.addEventListener('click',e=>{
+    const a=ensure(); if(!a.duration) return;
+    const r=prog.getBoundingClientRect();
+    a.currentTime=((e.clientX-r.left)/r.width)*a.duration;
+  });
+});
+</script>
+
+</body>
+</html>
